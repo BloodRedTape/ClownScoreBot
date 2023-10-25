@@ -19,7 +19,6 @@ add_executable(ClownScoreBot
     "./sources/main.cpp"
     "./sources/bot.cpp"
     "./sources/utils.cpp"
-    "./sources/tag.cpp"
  "sources/score_database.cpp" "sources/simple_bot.cpp")
 
 target_compile_features(ClownScoreBot PUBLIC cxx_std_17)
