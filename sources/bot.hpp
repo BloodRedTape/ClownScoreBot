@@ -60,8 +60,8 @@ public:
 
     void UpdateUserState(TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query);
 
-    bool IsEligibleUser(const TgBot::Message::Ptr& message)const{
-        return !message->from->isBot;
+    static std::string GetUsername(TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query){
+        return query ? query->from->username : message->from->username;
     }
 
     void OnLog(std::string message);

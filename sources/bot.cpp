@@ -3,7 +3,6 @@
 #include <exception>
 #include <string_view>
 #include "utils.hpp"
-#include "tag.hpp"
 #include "format.hpp"
 
 ClownScoreBot::ClownScoreBot(const INIReader &config):
@@ -46,6 +45,13 @@ std::unique_ptr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr 
     if (StartsWith(message->text, "/assign")) {
         auto users = bot.JoinedUsers(message->chat->id);
 
+        bot.Join(message->chat->id, ClownScoreBot::GetUsername(message, query));
+
+        if (!users.size()) {
+            bot.SendMessage(message, "There is no users joined in score system, user /join");
+            return {};
+        }
+
         auto keyboard = Keyboard::ToKeyboard(users);
 
         auto result = bot.SendKeyboard(message, "Pick user", keyboard);
@@ -54,7 +60,7 @@ std::unique_ptr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr 
     }
 
     if (StartsWith(message->text, "/join")) {
-        bot.Join(message->chat->id, message->from->username);
+        bot.Join(message->chat->id, ClownScoreBot::GetUsername(message, query));
 
         return {};
     }
