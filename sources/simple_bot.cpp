@@ -14,6 +14,27 @@ KeyboardLayout Keyboard::ToKeyboard(const std::vector<std::string>& texts) {
     return layout;
 }
 
+TgBot::InlineKeyboardMarkup::Ptr ToInlineKeyboardMarkup(const KeyboardLayout &keyboard) {
+
+    TgBot::InlineKeyboardMarkup::Ptr keyboard_markup(new TgBot::InlineKeyboardMarkup);
+
+    for (const auto& row : keyboard) {
+        std::vector<TgBot::InlineKeyboardButton::Ptr> row_markup;
+
+        for (const auto& button : row) {
+            TgBot::InlineKeyboardButton::Ptr button_markup(new TgBot::InlineKeyboardButton);
+            button_markup->text = button.Text;
+            button_markup->callbackData = button.CallbackData;
+
+            row_markup.push_back(button_markup);
+        }
+
+        keyboard_markup->inlineKeyboard.push_back(row_markup);
+    }
+    
+    return keyboard_markup;
+}
+
 SimpleBot::SimpleBot(const std::string& token) :
     TgBot::Bot(token)
 {}
@@ -62,27 +83,33 @@ TgBot::Message::Ptr SimpleBot::SendMessage(const TgBot::Message::Ptr& source, co
     return result;
 }
 
+void SimpleBot::EditMessage(TgBot::Message::Ptr message, const std::string& text, const KeyboardLayout& keyboard) {
+    EditMessage(message, text, ToInlineKeyboardMarkup(keyboard));
+}
+
 TgBot::Message::Ptr SimpleBot::SendKeyboard(const TgBot::Message::Ptr& source, const std::string& message, const KeyboardLayout& keyboard) {
-    using namespace TgBot;
+    return SendMessage(source, message, ToInlineKeyboardMarkup(keyboard));
+}
 
-    InlineKeyboardMarkup::Ptr keyboard_markup(new InlineKeyboardMarkup);
-
-    for (const auto& row : keyboard) {
-        std::vector<InlineKeyboardButton::Ptr> row_markup;
-
-        for (const auto& button : row) {
-
-            InlineKeyboardButton::Ptr button_markup(new InlineKeyboardButton);
-            button_markup->text = button.Text;
-            button_markup->callbackData = button.CallbackData;
-
-            row_markup.push_back(button_markup);
+void SimpleBot::EditMessage(TgBot::Message::Ptr message, const std::string& text, TgBot::GenericReply::Ptr reply) {
+    try{
+        if (text.size()) {
+            getApi().editMessageText(text, message->chat->id, message->messageId, "", "", false, reply);
+        } else {
+            getApi().editMessageReplyMarkup(message->chat->id, message->messageId, "", reply);
         }
-
-        keyboard_markup->inlineKeyboard.push_back(row_markup);
     }
+    catch (const std::exception& exception) {
+        Log("Failed to edit message: %", exception.what());
+    }
+}
 
-    return SendMessage(source, message, keyboard_markup);
+void SimpleBot::EditMessage(TgBot::Message::Ptr message, const KeyboardLayout& keyboard) {
+    EditMessage(message, "", ToInlineKeyboardMarkup(keyboard));
+}
+
+void SimpleBot::EditMessage(TgBot::Message::Ptr message, const std::string& text) {
+    EditMessage(message, text, nullptr);
 }
 
 bool SimpleBot::AnswerCallbackQuery(const std::string& callbackQueryId, const std::string& text) {

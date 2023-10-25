@@ -40,6 +40,14 @@ public:
 
     TgBot::Message::Ptr SendKeyboard(const TgBot::Message::Ptr& source, const std::string& message, const KeyboardLayout& keyboard);
 
+    void EditMessage(TgBot::Message::Ptr message, const std::string &text, TgBot::GenericReply::Ptr reply);
+
+    void EditMessage(TgBot::Message::Ptr message, const std::string &text, const KeyboardLayout &keyboard);
+
+    void EditMessage(TgBot::Message::Ptr message, const KeyboardLayout &keyboard);
+
+    void EditMessage(TgBot::Message::Ptr message, const std::string &text);
+
     void DeleteMessage(TgBot::Message::Ptr message);
 
     bool AnswerCallbackQuery(const std::string& callbackQueryId, const std::string& text = "");

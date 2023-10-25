@@ -60,7 +60,7 @@ std::unique_ptr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr 
 
         auto result = bot.SendKeyboard(message, "Pick user", keyboard);
 
-        return std::make_unique<WaitForUsername>(result);
+        return std::make_unique<WaitForUsername>(result, message->from->username);
     }
 
     if (StartsWith(message->text, "/join")) {
@@ -100,15 +100,15 @@ std::unique_ptr<UserState> WaitForUsername::Update(ClownScoreBot& bot, TgBot::Me
         bot.SendMessage(message, "Please, pick username first");
         return {};
     }
+
     bot.AnswerCallbackQuery(query->id);
 
-    bot.DeleteMessage(KeyboardMessage);
-
     if (query->data == CancelButton) {
+        bot.DeleteMessage(KeyboardMessage);
         return std::make_unique<None>();
     }
 
-    auto result = bot.SendKeyboard(message, "Pick score",
+    bot.EditMessage(KeyboardMessage, "Pick score",
     {
             {
                 {"1"},
@@ -133,7 +133,7 @@ std::unique_ptr<UserState> WaitForUsername::Update(ClownScoreBot& bot, TgBot::Me
             }
     });
 
-    return std::make_unique<WaitForScore>(result, query->data);
+    return std::make_unique<WaitForScore>(KeyboardMessage, InitiatorUsername, query->data);
 }
 
 std::unique_ptr<UserState> WaitForScore::Update(ClownScoreBot& bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query){
@@ -141,6 +141,7 @@ std::unique_ptr<UserState> WaitForScore::Update(ClownScoreBot& bot, TgBot::Messa
         bot.SendMessage(message, "Please, pick score first");
         return {};
     }
+
     bot.AnswerCallbackQuery(query->id);
     
     bot.DeleteMessage(KeyboardMessage);
@@ -151,11 +152,17 @@ std::unique_ptr<UserState> WaitForScore::Update(ClownScoreBot& bot, TgBot::Messa
 
     int8_t score = std::atoi(query->data.c_str());
 
-    bot.Assign(message->chat->id, Username, score);
+    bot.Assign(message->chat->id, TargetUsername, score);
 
-    int64_t total = bot.Stats(message->chat->id, Username);
+    int64_t total = bot.Stats(message->chat->id, TargetUsername);
+    
+    bool self_added = InitiatorUsername == TargetUsername;
 
-    bot.SendMessage(message, Format(u8"Added % 🤡 points to %'s score, total % 🤡", (int)score, Username, total));
+    std::string reply = self_added 
+        ? Format(u8"Added % 🤡 points to %'s score, total % 🤡", score, TargetUsername, total)
+        : Format(u8"% added % 🤡 points to %'s score, total % 🤡", InitiatorUsername, score, '@' + TargetUsername, total);
+
+    bot.SendMessage(message, reply);
     
     return std::make_unique<None>();
 }

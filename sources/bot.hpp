@@ -20,9 +20,11 @@ struct None : UserState {
 
 struct WaitForUsername : UserState {
     TgBot::Message::Ptr KeyboardMessage;
+    std::string InitiatorUsername;
 
-    WaitForUsername(TgBot::Message::Ptr keyboard_message):
-        KeyboardMessage(keyboard_message)
+    WaitForUsername(TgBot::Message::Ptr keyboard_message, std::string initiator):
+        KeyboardMessage(keyboard_message),
+        InitiatorUsername(std::move(initiator))
     {}
 
     std::unique_ptr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
@@ -30,11 +32,13 @@ struct WaitForUsername : UserState {
 
 struct WaitForScore : UserState {
     TgBot::Message::Ptr KeyboardMessage;
-    std::string Username;
+    std::string InitiatorUsername;
+    std::string TargetUsername;
 
-    WaitForScore(TgBot::Message::Ptr keyboard_message, std::string username):
+    WaitForScore(TgBot::Message::Ptr keyboard_message, std::string initiator, std::string target):
         KeyboardMessage(keyboard_message),
-        Username(std::move(username))
+        InitiatorUsername(std::move(initiator)),
+        TargetUsername(std::move(target))
     {}
     
     std::unique_ptr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
