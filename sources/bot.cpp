@@ -159,8 +159,8 @@ std::unique_ptr<UserState> WaitForScore::Update(ClownScoreBot& bot, TgBot::Messa
     bool self_added = InitiatorUsername == TargetUsername;
 
     std::string reply = self_added 
-        ? Format(u8"Added % 🤡 points to %'s score, total % 🤡", score, TargetUsername, total)
-        : Format(u8"% added % 🤡 points to %'s score, total % 🤡", InitiatorUsername, score, '@' + TargetUsername, total);
+        ? Format(u8"Added % 🤡 points to %'s score, total % 🤡", (int)score, TargetUsername, total)
+        : Format(u8"% added % 🤡 points to %'s score, total % 🤡", InitiatorUsername, (int)score, '@' + TargetUsername, total);
 
     bot.SendMessage(message, reply);
     
