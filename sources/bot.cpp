@@ -78,7 +78,11 @@ std::unique_ptr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr 
     }
 
     if (StartsWith(message->text, "/rating")) {
-        auto rating = bot.Rating(message->chat->id);
+        auto rating = ToArray(bot.Rating(message->chat->id));
+
+        std::sort(rating.begin(), rating.end(), [](const auto& left, const auto &right) {
+            return left.second > right.second; 
+        });
         
         std::string result;
     

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstring>
 #include <algorithm>
+#include <unordered_map>
 
 struct CStrComparator {
     bool operator()(const char * a, const char *b) const {
@@ -46,6 +47,17 @@ auto Keys(const T& collection) {
     }
 
     return keys;
+}
+
+template <typename K, typename V>
+std::vector<std::pair<K, V>> ToArray(std::unordered_map<K, V> &&map) {
+    std::vector<std::pair<K, V>> result;
+
+    for (auto&& [key, value] : map) {
+        result.emplace_back(std::move(key), std::move(value));
+    }
+
+    return result;
 }
 
 inline std::string Join(const std::vector<std::string>& strings, char delimiter) {
