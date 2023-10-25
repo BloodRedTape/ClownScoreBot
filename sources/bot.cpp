@@ -5,6 +5,8 @@
 #include "utils.hpp"
 #include "format.hpp"
 
+const char *CancelButton = u8"[Cancel]";
+
 ClownScoreBot::ClownScoreBot(const INIReader &config):
     SimpleBot(
         config.GetString(SectionName, "Token", "")
@@ -48,11 +50,13 @@ std::unique_ptr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr 
         bot.Join(message->chat->id, ClownScoreBot::GetUsername(message, query));
 
         if (!users.size()) {
-            bot.SendMessage(message, "There is no users joined in score system, user /join");
+            bot.SendMessage(message, "There is no users in score system, use /join");
             return {};
         }
 
         auto keyboard = Keyboard::ToKeyboard(users);
+
+        keyboard.push_back({ {CancelButton} });
 
         auto result = bot.SendKeyboard(message, "Pick user", keyboard);
 
@@ -100,6 +104,10 @@ std::unique_ptr<UserState> WaitForUsername::Update(ClownScoreBot& bot, TgBot::Me
 
     bot.DeleteMessage(KeyboardMessage);
 
+    if (query->data == CancelButton) {
+        return std::make_unique<None>();
+    }
+
     auto result = bot.SendKeyboard(message, "Pick score",
     {
             {
@@ -119,6 +127,9 @@ std::unique_ptr<UserState> WaitForUsername::Update(ClownScoreBot& bot, TgBot::Me
             },
             {
                 {"10"},
+            },
+            {
+                {CancelButton}
             }
     });
 
@@ -130,10 +141,13 @@ std::unique_ptr<UserState> WaitForScore::Update(ClownScoreBot& bot, TgBot::Messa
         bot.SendMessage(message, "Please, pick score first");
         return {};
     }
+    bot.AnswerCallbackQuery(query->id);
     
     bot.DeleteMessage(KeyboardMessage);
 
-    bot.AnswerCallbackQuery(query->id);
+    if (query->data == CancelButton) {
+        return std::make_unique<None>();
+    }
 
     int8_t score = std::atoi(query->data.c_str());
 
