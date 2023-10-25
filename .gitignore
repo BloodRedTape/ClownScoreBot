@@ -1,0 +1,14 @@
+build
+out
+.vs
+.vscode
+.idea
+.cache
+cmake-build-debug
+
+run_tree
+data
+
+compile_commands.json
+
+CMakeSettings.json
