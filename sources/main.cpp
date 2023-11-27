@@ -1,7 +1,7 @@
 #include "bot.hpp"
-#include "error.hpp"
 #include "utils.hpp"
 #include <core/os/file.hpp>
+#include <core/os/date_time.hpp>
 
 #include <vector>
 #include "core/string.hpp"
@@ -22,7 +22,9 @@ int main(int argc, char **argv){
 
     Ini config(config_file_content);
 
-    if(config.IsValid()){
+    Println("Started at: %", FmtDate(DateTime::Now()));
+
+    if(!config.IsValid()){
         return Errorln("Invalid INI config proveded");
     }
 

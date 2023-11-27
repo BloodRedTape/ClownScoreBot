@@ -2,7 +2,6 @@
 #include <exception>
 #include <core/unicode.hpp>
 #include "utils.hpp"
-#include "error.hpp"
 
 const char *CancelButton = SX_UTF8("[Cancel]");
 
