@@ -22,8 +22,8 @@ int main(int argc, char **argv){
 
     Ini config(config_file_content);
 
-    if(config.ParseError()){
-        return Error("Can't parse ini config");
+    if(config.IsValid()){
+        return Errorln("Invalid INI config proveded");
     }
 
     ClownScoreBot bot(config);
