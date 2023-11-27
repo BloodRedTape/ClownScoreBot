@@ -1,30 +1,37 @@
 #include "score_database.hpp"
 #include "utils.hpp"
-#include <nlohmann/json.hpp>
+#include <core/os/file.hpp>
+#include <json/json.hpp>
+#include <ini/ini.hpp>
+#include <core/assert.hpp>
 
-using json = nlohmann::json;
-
-JsonDatabase::JsonDatabase(const INIReader& config):
+JsonDatabase::JsonDatabase(const Ini& config):
 	m_Filename(
-		config.GetString(SectionName, "Filepath", "")
+		config.GetString(SectionName, "Filepath")
 	)
 {
-	m_Map = json::parse(ReadEntireFile(m_Filename));
+	auto content = File::ReadEntire(m_Filename);
+
+	if(content.HasValue()){
+		m_Map = Json::parse(content.Value());
+	}else {
+		SX_ASSERT(false, "Can't read file for some reason");
+	}
 }
 
-void JsonDatabase::Join(int64_t chat, const std::string& username){
+void JsonDatabase::Join(int64_t chat, const String& username){
 	m_Map[chat][username];
 
 	SaveToFile();
 }
 
-void JsonDatabase::Assign(int64_t chat, const std::string& username, int8_t score){
-	m_Map[chat][username].push_back(score);
+void JsonDatabase::Assign(int64_t chat, const String& username, int8_t score){
+	m_Map[chat][username].Add(score);
 
 	SaveToFile();
 }
 
-int64_t JsonDatabase::Stats(int64_t chat, const std::string& username){
+int64_t JsonDatabase::Stats(int64_t chat, const String& username){
 	int64_t score = 0;
 
 	for (int8_t one : m_Map[chat][username]) {
@@ -34,8 +41,8 @@ int64_t JsonDatabase::Stats(int64_t chat, const std::string& username){
 	return score;
 }
 
-std::unordered_map<std::string, int64_t> JsonDatabase::Rating(int64_t chat) {
-	std::unordered_map<std::string, int64_t> rating;
+HashTable<String, int64_t> JsonDatabase::Rating(int64_t chat) {
+	HashTable<String, int64_t> rating;
 
 	for (const auto& [username, _] : m_Map[chat]) {
 		rating[username] = Stats(chat, username);
@@ -44,11 +51,11 @@ std::unordered_map<std::string, int64_t> JsonDatabase::Rating(int64_t chat) {
 	return rating;
 }
 
-std::vector<std::string> JsonDatabase::JoinedUsers(int64_t chat) {
-	return Keys(m_Map[chat]);
+List<String> JsonDatabase::JoinedUsers(int64_t chat) {
+	return m_Map[chat].Keys();
 }
 
 void JsonDatabase::SaveToFile()
 {
-	WriteEntireFile(m_Filename, json(m_Map).dump(1, '\t'));
+	File::WriteEntire(m_Filename, Json(m_Map).dump(1, '\t'));
 }

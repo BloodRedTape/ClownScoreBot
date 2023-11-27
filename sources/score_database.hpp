@@ -1,32 +1,32 @@
 #pragma once
 
-#include <vector>
-#include <string>
-#include <unordered_map>
-#include <INIReader.h>
+#include <ini/ini.hpp>
+#include <core/list.hpp>
+#include <core/string.hpp>
+#include <core/hash_table.hpp>
 
-using ScoreList = std::vector<int8_t>;
-using ScoreMap = std::unordered_map<std::string, ScoreList>;
-using ChatMap = std::unordered_map<int64_t, ScoreMap>;
+using ScoreList = List<int8_t>;
+using ScoreMap = HashTable<String, ScoreList>;
+using ChatMap = HashTable<int64_t, ScoreMap>;
 
 
 class JsonDatabase {
 	static constexpr const char *SectionName = "JsonDatabase";
 private:
 	ChatMap m_Map;
-	std::string m_Filename;
+	String m_Filename;
 public:
-	JsonDatabase(const INIReader &config);
+	JsonDatabase(const Ini &config);
 
-	void Join(int64_t chat, const std::string &username);
+	void Join(int64_t chat, const String &username);
 
-	void Assign(int64_t chat, const std::string &username, int8_t score);
+	void Assign(int64_t chat, const String &username, int8_t score);
 
-	int64_t Stats(int64_t chat, const std::string &username);
+	int64_t Stats(int64_t chat, const String &username);
 
-	std::unordered_map<std::string, int64_t> Rating(int64_t chat);
+	HashTable<String, int64_t> Rating(int64_t chat);
 
-	std::vector<std::string> JoinedUsers(int64_t chat);
+	List<String> JoinedUsers(int64_t chat);
 
 private:
 	void SaveToFile();

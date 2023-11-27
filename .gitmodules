@@ -1,9 +1,12 @@
-[submodule "thirdparty/tgbot-cpp"]
-	path = thirdparty/tgbot-cpp
-	url = https://github.com/reo7sp/tgbot-cpp
-[submodule "thirdparty/json"]
-	path = thirdparty/json
-	url = https://github.com/nlohmann/json
-[submodule "thirdparty/inih"]
-	path = thirdparty/inih
-	url = https://github.com/benhoyt/inih.git
+[submodule "thirdparty/straitx-core"]
+	path = thirdparty/straitx-core
+	url = https://github.com/straitx/core
+[submodule "thirdparty/straitx-tgbot"]
+	path = thirdparty/straitx-tgbot
+	url = https://github.com/straitx/tgbot
+[submodule "thirdparty/straitx-json"]
+	path = thirdparty/straitx-json
+	url = https://github.com/straitx/json
+[submodule "thirdparty/straitx-ini"]
+	path = thirdparty/straitx-ini
+	url = https://github.com/straitx/ini

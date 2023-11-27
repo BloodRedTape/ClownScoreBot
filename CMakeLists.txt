@@ -2,32 +2,26 @@ cmake_minimum_required(VERSION 3.10)
 
 project(ClownScoreBot)
 
-add_subdirectory(thirdparty/tgbot-cpp)
-add_subdirectory(thirdparty/json)
-
-add_library(inih STATIC
-    "./thirdparty/inih/ini.c"
-    "./thirdparty/inih/cpp/INIReader.cpp"
-)
-
-target_include_directories(inih 
-    PRIVATE "./thirdparty/inih"
-    PUBLIC "./thirdparty/inih/cpp"
-)
+add_subdirectory(thirdparty/straitx-json)
+add_subdirectory(thirdparty/straitx-core)
+add_subdirectory(thirdparty/straitx-tgbot)
+add_subdirectory(thirdparty/straitx-ini)
 
 add_executable(ClownScoreBot
     "./sources/main.cpp"
     "./sources/bot.cpp"
     "./sources/utils.cpp"
- "sources/score_database.cpp" "sources/simple_bot.cpp")
+    "./sources/score_database.cpp" 
+)
 
 target_compile_features(ClownScoreBot PUBLIC cxx_std_17)
 
 target_link_libraries(ClownScoreBot
-    TgBot
-    nlohmann_json
     boost_locale
-    inih
+    StraitXCore
+    StraitXTgBot
+    StraitXJson
+    StraitXIni
 )
 
 target_include_directories(ClownScoreBot PRIVATE "./sources")

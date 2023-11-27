@@ -1,28 +1,30 @@
 #include "bot.hpp"
-#include "format.hpp"
+#include "error.hpp"
 #include "utils.hpp"
+#include <core/os/file.hpp>
+
+#include <vector>
+#include "core/string.hpp"
 
 int main(int argc, char **argv){
-
-    std::string config_path = "Config.ini";
+    String config_path = "Config.ini";
 
     if(argc == 2){
         Println("Supplied config path: %", argv[1]);
-        config_path = argv[1];
+        config_path = String(argv[1]);
     }
 
-    std::string config_file_content = ReadEntireFile(config_path);
+    String config_file_content = File::ReadEntire(config_path).Value(String::Empty);
 
-    if (!config_file_content.size()) {
+    if (!config_file_content.Size()) {
         return Error("Config file is empty or does not exists");
     }
 
-    INIReader config(config_file_content.c_str(), config_file_content.size());
+    Ini config(config_file_content);
 
     if(config.ParseError()){
         return Error("Can't parse ini config");
     }
-
 
     ClownScoreBot bot(config);
 

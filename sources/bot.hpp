@@ -1,56 +1,57 @@
 #pragma once
 
-#include <string>
 #include <vector>
 #include <memory>
-#include <unordered_map>
-#include "simple_bot.hpp"
-#include "INIReader.h"
+#include <core/hash_table.hpp>
+#include <core/string.hpp>
+#include <tgbot/simple_bot.hpp>
+#include <ini/ini.hpp>
+#include <core/unique_ptr.hpp>
 #include "score_database.hpp"
 
 class ClownScoreBot;
 
 struct UserState {
-    virtual std::unique_ptr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query) = 0;
+    virtual UniquePtr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query) = 0;
 };
 
 struct None : UserState {
-    std::unique_ptr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
+    UniquePtr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
 };
 
 struct WaitForUsername : UserState {
     TgBot::Message::Ptr KeyboardMessage;
-    std::string InitiatorUsername;
+    String InitiatorUsername;
 
-    WaitForUsername(TgBot::Message::Ptr keyboard_message, std::string initiator):
+    WaitForUsername(TgBot::Message::Ptr keyboard_message, String initiator):
         KeyboardMessage(keyboard_message),
         InitiatorUsername(std::move(initiator))
     {}
 
-    std::unique_ptr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
+    UniquePtr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
 };
 
 struct WaitForScore : UserState {
     TgBot::Message::Ptr KeyboardMessage;
-    std::string InitiatorUsername;
-    std::string TargetUsername;
+    String InitiatorUsername;
+    String TargetUsername;
 
-    WaitForScore(TgBot::Message::Ptr keyboard_message, std::string initiator, std::string target):
+    WaitForScore(TgBot::Message::Ptr keyboard_message, String initiator, String target):
         KeyboardMessage(keyboard_message),
         InitiatorUsername(std::move(initiator)),
         TargetUsername(std::move(target))
     {}
     
-    std::unique_ptr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
+    UniquePtr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
 };
 
 class ClownScoreBot: public SimpleBot, public JsonDatabase{
 public: 
     static constexpr const char *SectionName = "Bot";
 
-    std::unordered_map<std::string, std::unique_ptr<UserState>> m_Users;
+    HashTable<String, UniquePtr<UserState>> m_Users;
 public:
-    ClownScoreBot(const INIReader &config);
+    ClownScoreBot(const Ini &config);
 
     void OnUnknownCommand(TgBot::Message::Ptr message) {
         UpdateUserState(message, nullptr);
@@ -60,13 +61,13 @@ public:
         UpdateUserState(query->message, query);
     }
 
-    void EnsureUserState(const std::string &username);
+    void EnsureUserState(const String &username);
 
     void UpdateUserState(TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query);
 
-    static std::string GetUsername(TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query){
-        return query ? query->from->username : message->from->username;
+    static String GetUsername(TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query){
+        return String::FromStdString(query ? query->from->username : message->from->username);
     }
 
-    void OnLog(std::string message);
+    void OnLog(String message);
 };
