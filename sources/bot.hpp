@@ -45,6 +45,12 @@ struct WaitForScore : UserState {
     UniquePtr<UserState> Update(ClownScoreBot &bot, TgBot::Message::Ptr message, TgBot::CallbackQuery::Ptr query)override;
 };
 
+inline std::string MakeTagLink(const std::string& tag) {
+    std::string link = "https://t.me/" + tag;
+
+    return "<a href=\"" + link + "\">" + tag + "</a>";
+}
+
 class ClownScoreBot: public SimpleBot, public JsonDatabase{
 public: 
     static constexpr const char *SectionName = "Bot";
