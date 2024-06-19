@@ -41,6 +41,16 @@ int64_t JsonDatabase::Stats(int64_t chat, const String& username){
 	return score;
 }
 
+int64_t JsonDatabase::Stats(const String& username) {
+	int64_t score = 0;
+	
+	for (auto [chat, _] : m_Map) {
+		score += Stats(chat, username);
+	}
+
+	return score;
+}
+
 HashTable<String, int64_t> JsonDatabase::Rating(int64_t chat) {
 	HashTable<String, int64_t> rating;
 

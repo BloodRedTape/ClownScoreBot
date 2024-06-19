@@ -70,7 +70,15 @@ UniquePtr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr messag
     if (StartsWith(message->text, "/stats")) {
         int64_t total = bot.Stats(message->chat->id, String::FromStdString(message->from->username));
 
-        bot.SendMessage(message, Format(SX_UTF8("% has % 🤡 points"), message->from->username, total));
+        bot.SendMessage(message, Format(SX_UTF8("% has % 🤡 points"), MakeTagLink(message->from->username), total));
+
+        return {};
+    }
+
+    if (StartsWith(message->text, "/global_stats")) {
+        int64_t total = bot.Stats(String::FromStdString(message->from->username));
+
+        bot.SendMessage(message, Format(SX_UTF8("% has % 🤡 points in all chats"), MakeTagLink(message->from->username), total));
 
         return {};
     }
@@ -85,7 +93,7 @@ UniquePtr<UserState> None::Update(ClownScoreBot& bot, TgBot::Message::Ptr messag
         String result;
     
         for (const auto& [username, total] : rating) {
-            result += Format(SX_UTF8("% has % 🤡 points"), username, total) + '\n';
+            result += Format(SX_UTF8("% has % 🤡 points"), MakeTagLink(username), total) + '\n';
         }
 
         bot.SendMessage(message, result);
@@ -110,7 +118,7 @@ UniquePtr<UserState> WaitForUsername::Update(ClownScoreBot& bot, TgBot::Message:
         return MakeUnique<None>();
     }
 
-    bot.EditMessage(KeyboardMessage, "Pick score",
+    bot.EditMessage(KeyboardMessage, Format("Pick score for %", MakeTagLink(query->data)),
     {
             {
                 {"1"},
@@ -161,8 +169,8 @@ UniquePtr<UserState> WaitForScore::Update(ClownScoreBot& bot, TgBot::Message::Pt
     bool self_added = InitiatorUsername == TargetUsername;
 
     String reply = self_added 
-        ? Format(SX_UTF8("Added % 🤡 points to %'s score, total % 🤡"), (int)score, TargetUsername, total)
-        : Format(SX_UTF8("% added % 🤡 points to %'s score, total % 🤡"), InitiatorUsername, (int)score, '@' + TargetUsername, total);
+        ? Format(SX_UTF8("Added % 🤡 points to %'s score, total % 🤡"), (int)score, MakeTagLink(TargetUsername), total)
+        : Format(SX_UTF8("% added % 🤡 points to %'s score, total % 🤡"), MakeTagLink(InitiatorUsername), (int)score, '@' + TargetUsername, total);
 
     bot.SendMessage(message, reply);
     

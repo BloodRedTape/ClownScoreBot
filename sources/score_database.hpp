@@ -24,6 +24,8 @@ public:
 
 	int64_t Stats(int64_t chat, const String &username);
 
+	int64_t Stats(const String &username);
+
 	HashTable<String, int64_t> Rating(int64_t chat);
 
 	List<String> JoinedUsers(int64_t chat);
